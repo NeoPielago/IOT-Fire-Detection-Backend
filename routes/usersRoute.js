@@ -1,6 +1,14 @@
 import express from "express";
 const router = express.Router();
-import { body } from "express-validator";
+
+import {
+  validateUpdateInput,
+  validateRegistration,
+  validateLogin,
+  validateGetUser,
+  validateAdminReg,
+  validateGetAdmin,
+} from "../middleware/validator.js";
 
 import {
   registerUser,
@@ -9,53 +17,25 @@ import {
   updateUser,
   getUsers,
   login,
+  registerAdmin,
   getAdmins,
+  getAdmin,
 } from "../controller/userController.js";
-import { protect } from "../middleware/authMiddleware.js";
-
-const containsLetterAndNumber = (value) =>
-  /[a-zA-Z]/.test(value) && /\d/.test(value);
+import { protect, protectAdmin } from "../middleware/authMiddleware.js";
 
 //GEhttp://localhost:3000/api/user
 router.get("/getUsers", protect, getUsers);
 
-router.get("/getUser", protect, getUser);
+router.get("/getUser", protect, validateGetUser, getUser);
 
-router.post(
-  "/register",
-  [
-    body("email")
-      .isEmail()
-      .normalizeEmail()
-      .toLowerCase()
-      .withMessage("Must be a valid email"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password length must be greater than 8 characters")
-      .custom(containsLetterAndNumber)
-      .withMessage("Password must contain letters and numbers"),
-  ],
-  registerUser
-);
+router.post("/register", validateRegistration, registerUser);
 
-router.put("/update", updateUser);
-router.post(
-  "/login",
-  [
-    body("email")
-      .isEmail()
-      .normalizeEmail()
-      .toLowerCase()
-      .withMessage("Must be a valid email"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password length must be greater than 8 characters")
-      .custom(containsLetterAndNumber)
-      .withMessage("Password must contain letters and numbers"),
-  ],
-  login
-);
+router.patch("/update", validateUpdateInput, protect, updateUser);
+
+router.post("/login", validateLogin, login);
 router.post("/logout", logout);
-router.get("/admins", getAdmins);
+router.post("/admin/register", validateAdminReg, registerAdmin);
+router.get("/admin/getAdmins", protectAdmin, getAdmins);
+router.get("/admin/getAdmin", validateGetAdmin, protectAdmin, getAdmin);
 
 export default router;
