@@ -34,6 +34,14 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
       req.user = await Admins.findById(decoded.userId).select("-password");
+
+      if (!req.user) {
+        res.status(401).json({
+          error:
+            "Unauthorised, your user access level does not meet the requirements of this endpoint.",
+        });
+      }
+
       next();
     } catch (error) {
       res.status(401);

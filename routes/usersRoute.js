@@ -8,6 +8,10 @@ import {
   validateGetUser,
   validateAdminReg,
   validateGetAdmin,
+  validateUpdateAdmin,
+  validateCreateDevice,
+  validateGetAlarmHistory,
+  validateGetDevices,
 } from "../middleware/validator.js";
 
 import {
@@ -20,6 +24,10 @@ import {
   registerAdmin,
   getAdmins,
   getAdmin,
+  updateAdmin,
+  createDevice,
+  getAlarmHistory,
+  getDevices,
 } from "../controller/userController.js";
 import { protect, protectAdmin } from "../middleware/authMiddleware.js";
 
@@ -37,5 +45,19 @@ router.post("/logout", logout);
 router.post("/admin/register", validateAdminReg, registerAdmin);
 router.get("/admin/getAdmins", protectAdmin, getAdmins);
 router.get("/admin/getAdmin", validateGetAdmin, protectAdmin, getAdmin);
+router.patch("/admin/update", validateUpdateAdmin, protectAdmin, updateAdmin);
 
+router.post(
+  "/device/createDevice",
+  validateCreateDevice,
+  protect,
+  createDevice
+);
+router.get(
+  "/alarm/getHistory",
+  validateGetAlarmHistory,
+  protect,
+  getAlarmHistory
+);
+router.get("/device/get", validateGetDevices, protect, getDevices);
 export default router;

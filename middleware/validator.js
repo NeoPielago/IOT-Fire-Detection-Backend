@@ -178,6 +178,85 @@ const validateGetAdmin = [
   },
 ];
 
+const validateUpdateAdmin = [
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .toLowerCase()
+    .withMessage("Email must be a valid email"),
+  body("isRevoked")
+    .notEmpty()
+    .withMessage("isRevoked value required, when updating admin")
+    .isBoolean()
+    .withMessage("isRevoked must be a boolean value"),
+
+  (req, res, next) => {
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty())
+      return res.status(422).json({ errors: errors.array() });
+
+    next();
+  },
+];
+
+const validateCreateDevice = [
+  body("deviceName")
+    .notEmpty()
+    .withMessage("deviceName is cannot be empty")
+    .isString()
+    .withMessage("deviceName must be a string"),
+  body("macAddress")
+    .notEmpty()
+    .withMessage("macAddress is required")
+    .isString()
+    .withMessage("macAddress must be a string"),
+  body("userId")
+    .notEmpty()
+    .withMessage("userId is required")
+    .isString()
+    .withMessage("userId must be a string"),
+
+  (req, res, next) => {
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty())
+      return res.status(422).json({ errors: errors.array() });
+
+    next();
+  },
+];
+
+const validateGetAlarmHistory = [
+  body("macAddress")
+    .notEmpty()
+    .withMessage("macAddress is required")
+    .isString()
+    .withMessage("macAddress must be a string"),
+
+  (req, res, next) => {
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty())
+      return res.status(422).json({ errors: errors.array() });
+
+    next();
+  },
+];
+
+const validateGetDevices = [
+  body("userId")
+    .notEmpty()
+    .withMessage("userId is required")
+    .isString()
+    .withMessage("userId must be a string"),
+
+  (req, res, next) => {
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty())
+      return res.status(422).json({ errors: errors.array() });
+
+    next();
+  },
+];
+
 //if you need to validate a specific endepoint create one here the export nd import to the route file
 export {
   validateUpdateInput,
@@ -186,4 +265,8 @@ export {
   validateGetUser,
   validateAdminReg,
   validateGetAdmin,
+  validateUpdateAdmin,
+  validateCreateDevice,
+  validateGetAlarmHistory,
+  validateGetDevices,
 };
