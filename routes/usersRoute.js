@@ -60,4 +60,7 @@ router.get(
   getAlarmHistory
 );
 router.get("/device/get", validateGetDevices, protect, getDevices);
+
+//reset password both admin and user
+
 export default router;

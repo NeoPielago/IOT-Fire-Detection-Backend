@@ -4,6 +4,8 @@ import generateToken from "../utils/generateToken.js";
 import Admins from "../model/adminModel.js";
 import Alarms from "../model/alarmsModel.js";
 import Devices from "../model/devicesModel.js";
+import jwt from "jsonwebtoken";
+import sendMail from "../utils/sendMail.js";
 
 //create new user
 //POST api/user/create
@@ -325,6 +327,93 @@ const getDevices = asyncHandler(async (req, res) => {
   }
 });
 
+const genPasswordResetLink = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const resident = await Users.findOne({ email: email.toLowerCase() });
+
+  const admin = await Admins.findOne({ email: email.toLowerCase() });
+
+  if (!resident && !admin) {
+    return res.status(400).json({ error: "user not registered" });
+  }
+
+  const user = resident ? resident : admin;
+
+  const secret = process.env.ACCESS_TOKEN_SECRET + user.password;
+
+  const payload = {
+    email: user.email,
+    id: user.id,
+  };
+
+  const token = jwt.sign(payload, secret, { expiresIn: "15m" });
+
+  const link = `http://localhost:3000/reset-password/${user.id}/${token}`;
+
+  console.log(link);
+
+  const html = `
+    <h1>Password Reset</h1>
+
+    <br>
+
+    <p>This is your password reset link. It will only be valid for 15 minutes.</p>
+    <p>LINK: ${link}</p>
+  `;
+
+  sendMail(html, "neopielago123@gmail.com", "One time Password Reset Link");
+  res.status(200).json({ message: "Email has been sent!" });
+});
+
+const passwordReset = asyncHandler(async (req, res) => {
+  const { id, token } = req.params;
+
+  const resident = await Users.findById(id);
+
+  const admin = await Admins.findById(id);
+
+  if (!resident && !admin) {
+    return res.status(400).json({ error: "Invalid id" });
+  }
+  const user = resident ? resident : admin;
+
+  const secret = process.env.ACCESS_TOKEN_SECRET + user.password;
+
+  try {
+    const payload = jwt.verify(token, secret);
+    res.render("reset-password", { email: user.email });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const passwordUpdate = asyncHandler(async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+  const resident = await Users.findById(id);
+
+  const admin = await Admins.findById(id);
+
+  if (!resident && !admin) {
+    return res.status(400).json({ error: "Invalid id" });
+  }
+  const user = resident ? resident : admin;
+
+  const secret = process.env.ACCESS_TOKEN_SECRET + user.password;
+
+  try {
+    const payload = jwt.verify(token, secret);
+
+    user.password = password;
+
+    await user.save();
+    res.status(200).json({ message: "password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   registerUser,
   logout,
@@ -339,4 +428,7 @@ export {
   getAlarmHistory,
   createDevice,
   getDevices,
+  genPasswordResetLink,
+  passwordReset,
+  passwordUpdate,
 };
