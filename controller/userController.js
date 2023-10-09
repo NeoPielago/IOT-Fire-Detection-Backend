@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if (userExist) {
       console.log(true);
-      throw new Error("User already exists");
+      res.status(400).json({ error: "user already exists" });
     }
 
     const user = await Users.create({
@@ -181,6 +181,10 @@ const login = asyncHandler(async (req, res) => {
   try {
     const user = await Users.findOne({ email: email.toLowerCase() });
     const admin = await Admins.findOne({ email: email.toLowerCase() });
+
+    if (!user && !admin) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     if (user && (await user.matchPassword(password))) {
       generateToken(res, user.id);
@@ -357,13 +361,15 @@ const genPasswordResetLink = asyncHandler(async (req, res) => {
     <h1>Password Reset</h1>
 
     <br>
-
+    <h2>Fire Safety and Detection System</h2>
+    <br>
     <p>This is your password reset link. It will only be valid for 15 minutes.</p>
     <p>LINK: ${link}</p>
   `;
 
+  //change the values passed into the function, replace them with variables once, websocket logic is ready
   sendMail(html, "neopielago123@gmail.com", "One time Password Reset Link");
-  res.status(200).json({ message: "Email has been sent!" });
+  res.status(200).json({ message: "Email has been sent!", isSent: true });
 });
 
 const passwordReset = asyncHandler(async (req, res) => {

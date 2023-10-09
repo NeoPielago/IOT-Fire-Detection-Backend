@@ -12,6 +12,16 @@ import {
   passwordReset,
   passwordUpdate,
 } from "./controller/userController.js";
+import cors from "cors";
+
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 connectDB();
 
@@ -23,7 +33,7 @@ app.use(cookieParser());
 
 app.use("/api/user", userRoutes);
 
-app.post("/password-reset", genPasswordResetLink);
+app.post("/password-reset", genPasswordResetLink); //forgot password
 
 app.get("/reset-password/:id/:token", passwordReset);
 

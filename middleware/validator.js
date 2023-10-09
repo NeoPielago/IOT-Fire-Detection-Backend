@@ -55,12 +55,8 @@ const validateRegistration = [
   body("lastName").notEmpty().withMessage("lastName is required."),
 
   body("contactNo")
-    .notEmpty()
-    .withMessage("contactNo is required.")
     .isNumeric()
-    .withMessage("contactNo must be a valid phone number")
-    .isLength({ min: 11, max: 11 })
-    .withMessage("contactNo must have a length of 11 digits "),
+    .withMessage("contactNo must be a valid phone number"),
 
   body("streetName")
     .isLength({ min: 3 })
